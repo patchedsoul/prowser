@@ -1,0 +1,363 @@
+/**
+https://www.w3.org/TR/html5/rendering.html
+*/
+
+article,
+aside,
+blockquote,
+body,
+center,
+dd,
+dir,
+div,
+dl,
+dt,
+fieldset,
+figcaption,
+figure,
+footer,
+form,
+frame,
+frameset,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+header,
+hgroup,
+hr,
+html,
+legend,
+listing,
+main,
+menu,
+nav,
+noframes,
+ol,
+p,
+plaintext,
+pre,
+section address,
+ul,
+xmp {
+    display: block;
+}
+
+li {
+    display: list-item;
+}
+
+[hidden],
+area,
+base,
+basefont,
+datalist,
+head,
+input[type="hidden"],
+link,
+meta,
+noembed,
+noframes,
+param,
+rp,
+script,
+source,
+style,
+template,
+title,
+track {
+    display: none;
+}
+
+table {
+    display: table;
+    box-sizing: border-box;
+    border-spacing: 2px;
+    border-collapse: separate;
+    text-indent: initial;
+}
+
+tr {
+    display: table-row;
+}
+
+thead {
+    display: table-header-group;
+}
+
+tbody {
+    display: table-row-group;
+}
+
+tfoot {
+    display: table-footer-group;
+}
+
+col {
+    display: table-column;
+}
+
+colgroup {
+    display: table-column-group;
+}
+
+table,
+td,
+th {
+    border-color: gray;
+}
+
+td,
+th {
+    display: table-cell;
+    padding: 1px;
+}
+
+caption {
+    display: table-caption;
+}
+
+th {
+    font-weight: bolder;
+    text-align: center;
+}
+
+caption {
+    text-align: center;
+}
+
+h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+h2 {
+    font-size: 1.5em;
+    margin: 0.75em 0;
+}
+
+h3 {
+    font-size: 1.17em;
+    margin: 0.83em 0;
+}
+
+mark {
+    background: yellow;
+    color: black;
+}
+
+h4,
+p,
+blockquote,
+ul,
+fieldset,
+form,
+ol,
+dl,
+dir,
+menu {
+    margin: 1.12em 0;
+}
+
+h5 {
+    font-size: 0.83em;
+    margin: 1.5em 0;
+}
+
+h6 {
+    font-size: 0.75em;
+    margin: 1.67em 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong {
+    font-weight: bolder;
+}
+
+blockquote {
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+i,
+cite,
+em,
+var,
+dfn,
+address {
+    font-style: italic;
+}
+
+pre,
+tt,
+code,
+kbd,
+samp {
+    font-family: monospace;
+}
+
+pre {
+    white-space: pre;
+}
+
+button,
+textarea,
+input,
+select {
+    display: inline-block;
+}
+
+big {
+    font-size: 1.17em;
+}
+
+small,
+sub,
+sup {
+    font-size: 0.83em;
+}
+
+sub {
+    vertical-align: sub;
+}
+
+sup {
+    vertical-align: super;
+}
+
+table {
+    border-spacing: 2px;
+}
+
+thead,
+tbody,
+tfoot {
+    vertical-align: middle;
+}
+
+td,
+th,
+tr {
+    vertical-align: inherit;
+}
+
+s,
+strike,
+del {
+    text-decoration: line-through;
+}
+
+hr {
+    margin: 0.5em auto;
+    border: 1px inset;
+}
+
+ol,
+ul,
+dir,
+menu,
+dd {
+    margin-left: 40px;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+ol ul,
+ul ol,
+ul ul,
+ol ol {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+u,
+ins {
+    text-decoration: underline;
+}
+
+br::before {
+    content: "\A";
+    white-space: pre-line;
+}
+
+center {
+    text-align: center;
+}
+
+iframe {
+    border: 2px inset;
+}
+
+video {
+    object-fit: contain;
+}
+
+:link,
+:visited {
+    text-decoration: underline;
+}
+
+:focus {
+    outline: thin dotted invert;
+}
+
+:link {
+    color: #0000ee;
+}
+
+:visited {
+    color: #551a8b;
+}
+
+:link:active,
+:visited:active {
+    color: #ff0000;
+}
+
+:link,
+:visited {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* */
+input,
+button {
+    border: 1px #d1d1d1 solid;
+    height: 28px;
+    border-radius: 2px;
+}
+
+input[type="checkbox"] {
+    height: 15px;
+    width: 15px;
+    background-color: #ccc;
+    margin: 3px;
+}
+
+input[type="text"] {
+    width: 212px;
+}
+
+input[type="submit"] {
+    width: 86px;
+}
+
+button {
+    background-color: #fcfcfc;
+}
+
+/* FIXME: currently not display correctly. Maybe only show first, then full solution */
+option {
+    display: none;
+}

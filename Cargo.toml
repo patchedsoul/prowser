@@ -1,0 +1,43 @@
+[package]
+name = "prowser"
+version = "0.1.0"
+authors = ["bo41 <botbob@disroot.org>"]
+edition = "2018"
+description = "a web browser with privacy and speed in mind"
+readme = "README.md"
+keywords = ["browser", "web"]
+publish = false
+# remove ↓ if sure that the COPYING file is valid
+#license = "GPL3 WITH Commons Clause"
+license-file = "COPYING"
+repository = "https://git.sr.ht/~bo41/browser"
+categories = ["browser"]
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+
+[dependencies.reqwest]
+version = "^0.10"
+features = ["blocking"] # "cookies"
+
+[dependencies.sdl2]
+version = ">0.1.0"
+default-features = false
+features = ["ttf", "image"]
+
+[profile.dev]
+codegen-units = 20
+
+[profile.release]
+lto = true
+panic = 'abort'
+codegen-units = 1
+
+[profile.bench]
+lto = true
+codegen-units = 1
+
+[profile.release.package."*"]
+opt-level = 3

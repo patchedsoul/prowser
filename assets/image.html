@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <style>
+            /*
+            * This CSS stylesheet defines the rules to be applied to any ImageDocuments,
+            * including those in frames.
+            */
+            .shrinkToFit {
+                cursor: zoom-in;
+            }
+
+            .overflowingVertical,
+            .overflowingHorizontalOnly {
+                cursor: zoom-out;
+            }
+
+            /*
+            This CSS stylesheet defines the rules to be applied to ImageDocuments that
+            are top level (e.g. not iframes).
+            */
+            body {
+                margin: 0;
+            }
+
+            img {
+                text-align: center;
+                position: absolute;
+                margin: auto;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+
+            img.overflowingVertical {
+                /* If we're overflowing vertically, we need to set margin-top to
+                0.  Otherwise we'll end up trying to vertically center, and end
+                up cutting off the top part of the image. */
+                margin-top: 0;
+            }
+
+            .completeRotation {
+                transition: transform 0.3s ease 0s;
+            }
+
+            body {
+                color: #eee;
+                background-color: #212121; /* background-image: url("chrome://global/skin/media/imagedoc-darknoise.png"); */
+            }
+
+            img.transparent {
+                background: hsl(0, 0%, 90%)
+                    url("chrome://global/skin/media/imagedoc-lightnoise.png");
+                color: #222;
+            }
+        </style>
+        <title>
+            replace_image (PNG Image, 320 × 101 pixels)
+        </title>
+    </head>
+    <body>
+        <img src="replace_image" alt="replace_image" />
+    </body>
+</html>
