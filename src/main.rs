@@ -92,8 +92,6 @@ view-source:<URL>       View source code of website"
     'running: loop {
         let (commands, text) = gui::handle_events(&mut event_pump, &sdl_context);
 
-        text_input.push_str(&text);
-
         let viewport = canvas.viewport();
 
         // FIXME: to get smooth scrolling, maybe save a offset to scroll and each frame update it by 1px until the offset is gone
@@ -485,6 +483,61 @@ view-source:<URL>       View source code of website"
                     }
                 }
             }
+        }
+
+        // display text input of search bar
+        if !text.is_empty() {
+            text_input.push_str(&text);
+
+            use crate::css::Color;
+            use crate::display::DisplayCommand;
+            use crate::layout::Rect;
+            use sdl2::rect::Rect as Sdl_rect;
+
+            let mut ui_list = Vec::new();
+            ui_list.push(DisplayCommand::SolidColor(
+                Color {
+                    r: 71,
+                    g: 71,
+                    b: 73,
+                    a: 255,
+                },
+                Rect {
+                    x: 100.0,
+                    y: 25.0,
+                    width: (viewport.width() - 200) as f32,
+                    height: 21.0,
+                },
+            ));
+
+            ui_list.push(DisplayCommand::Text(
+                Color {
+                    r: 200,
+                    g: 200,
+                    b: 200,
+                    a: 255,
+                },
+                text_input.clone(),
+                Rect {
+                    x: 110.0,
+                    y: 24.0,
+                    width: 600.0,
+                    height: 16.0,
+                },
+                Vec::new(),
+                16,
+                String::new(),
+            ));
+
+            canvas.set_viewport(Sdl_rect::new(0, 0, viewport.width(), viewport.height()));
+
+            gui::paint(
+                (&mut canvas, &texture_creator),
+                (managers.0, managers.1),
+                &ui_list,
+            )
+            .expect("Couldn't paint");
+            canvas.present();
         }
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000_u32 / 60));

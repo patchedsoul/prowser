@@ -296,7 +296,7 @@ pub fn display(
     let mut ui_list = Vec::new();
 
     // top nav bar
-    // black bar
+    // tab background / black bar
     ui_list.push(DisplayCommand::SolidColor(
         Color {
             r: 12,
@@ -531,7 +531,7 @@ pub fn display(
 }
 
 /// Paint a tree of `LayoutBoxes` on the gui.
-fn paint(
+pub fn paint(
     gui: (
         &mut sdl2::render::Canvas<sdl2::video::Window>,
         &sdl2::render::TextureCreator<sdl2::video::WindowContext>,
