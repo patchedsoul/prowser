@@ -193,6 +193,7 @@ fn matches(selector: &ChainedSelector, combinators: &[Vec<&ElementData>]) -> boo
 /// Checks if a `ChainedSelector` matches.
 ///
 /// [w3](https://www.w3.org/TR/selectors-3/#combinators)
+/// [performance considerations](https://docs.google.com/document/d/1vEW86DaeVs4uQzNFI5R-_xS9TcS1Cs_EUsHRSgCHGu8/edit)
 fn matches_chained_selector(
     mut parent_index: usize,
     mut sibling_index: usize,

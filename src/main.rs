@@ -15,6 +15,7 @@ mod tab;
 use gui::Command;
 
 use sdl2::messagebox::{show_message_box, ButtonData, MessageBoxButtonFlag, MessageBoxFlag};
+use sdl2::mouse::SystemCursor;
 use std::cmp::Ordering;
 use std::env;
 use std::fs;
@@ -69,14 +70,18 @@ view-source:<URL>       View source code of website"
     let dimensions = canvas.viewport().size();
     let mut tabs = vec![tab::Tab::new()];
     let mut current = 0;
+
+    // holds current cursor, as it apparently needs to stay in scope to be effective
+    let mut cursor;
+
+    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::WaitArrow).unwrap();
+    cursor.set();
     tabs[current].browse(url, dimensions);
 
-    let mut window = canvas.window_mut();
+    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Arrow).unwrap();
+    cursor.set();
 
-    // TODO: move to somewhere where it is needed
-    let cursor = sdl2::mouse::SystemCursor::Hand;
-    let a = sdl2::mouse::Cursor::from_system(cursor).unwrap();
-    a.set();
+    let mut window = canvas.window_mut();
 
     set_title(window, &tabs[current].title);
 
@@ -254,7 +259,11 @@ view-source:<URL>       View source code of website"
                 Command::OpenUrl(url) => {
                     let dimensions = viewport.size();
 
+                    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::WaitArrow).unwrap();
+                    cursor.set();
                     tabs[current].browse(url.to_string(), dimensions);
+                    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Hand).unwrap();
+                    cursor.set();
 
                     gui::display((&mut canvas, &texture_creator), managers, &tabs, current);
                 }
@@ -284,15 +293,26 @@ view-source:<URL>       View source code of website"
                 }
                 Command::StartTextInput => {
                     text_util.start();
+                    println!("Text input started");
+                    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::IBeam).unwrap();
+                    cursor.set();
                 }
                 Command::StopTextInput => {
                     text_util.stop();
+                    println!("Text input stopped");
+                    cursor =
+                        sdl2::mouse::Cursor::from_system(sdl2::mouse::SystemCursor::Arrow).unwrap();
+                    cursor.set();
                 }
                 Command::OpenUrlbar => {
                     if !text_input.is_empty() {
                         let dimensions = viewport.size();
 
+                        cursor = sdl2::mouse::Cursor::from_system(SystemCursor::WaitArrow).unwrap();
+                        cursor.set();
                         tabs[current].browse(text_input, dimensions);
+                        cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Hand).unwrap();
+                        cursor.set();
 
                         gui::display((&mut canvas, &texture_creator), managers, &tabs, current);
 
@@ -317,11 +337,11 @@ view-source:<URL>       View source code of website"
                     window = canvas.window_mut();
                     let state = window.fullscreen_state();
 
-                    if let sdl2::video::FullscreenType::Off = state {
-                        let _ = window.set_fullscreen(sdl2::video::FullscreenType::Desktop);
+                    let _ = if let sdl2::video::FullscreenType::Off = state {
+                        window.set_fullscreen(sdl2::video::FullscreenType::Desktop)
                     } else {
-                        let _ = window.set_fullscreen(sdl2::video::FullscreenType::Off);
-                    }
+                        window.set_fullscreen(sdl2::video::FullscreenType::Off)
+                    };
                 }
                 Command::Scroll(direction) => {
                     // scroll tabs
@@ -439,7 +459,17 @@ view-source:<URL>       View source code of website"
                                                     }
                                                 }
 
+                                                cursor = sdl2::mouse::Cursor::from_system(
+                                                    SystemCursor::WaitArrow,
+                                                )
+                                                .unwrap();
+                                                cursor.set();
                                                 tabs[current].browse(url, dimensions);
+                                                cursor = sdl2::mouse::Cursor::from_system(
+                                                    SystemCursor::Hand,
+                                                )
+                                                .unwrap();
+                                                cursor.set();
                                                 gui::display(
                                                     (&mut canvas, &texture_creator),
                                                     managers,

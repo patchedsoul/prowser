@@ -131,12 +131,13 @@ pub fn handle_events(
                 commands.push(Command::Present);
             }
             Event::DropText { filename, .. } => {
-                // TODO: search for text which is dropped. (probably getting each line by itself)
-                dbg!(filename);
+                // search for text which is dropped (FIXME: only in the url bar)
+                // FIXME: getting each line by itself, append them and on DropEnded search for it
+                commands.push(Command::OpenUrl(filename));
             }
             Event::DropFile { filename, .. } => {
-                // TODO: open file which is dropped. (probably getting each file by itself)
-                dbg!(filename);
+                // FIXME: getting each file by itself, open second in new tab
+                commands.push(Command::OpenUrl(format!("file://{}", filename)));
             }
             Event::KeyDown {
                 keycode: Some(key), ..
@@ -204,7 +205,7 @@ pub fn handle_events(
             Event::MouseButtonDown {
                 x, y, mouse_btn, ..
             } => {
-                if x < 100 || x > 700 || y < 24 || y > 40 {
+                if x < 100 || x > 700 || y < 25 || y > 50 {
                     commands.push(Command::StopTextInput);
                 }
                 match mouse_btn {
@@ -219,7 +220,7 @@ pub fn handle_events(
                     } */
                     _ => {
                         // ui bar
-                        if y > 24 && y < 40 {
+                        if y > 25 && y < 50 {
                             if x > 100 && x < 700 {
                                 commands.push(Command::StartTextInput);
                             } else if x < 16 {

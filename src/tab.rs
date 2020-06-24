@@ -129,6 +129,9 @@ impl Tab {
         } else if url_to_open.starts_with("finger://") {
             dbg!("TODO: finger");
             return;
+        } else if url_to_open.starts_with("file://") {
+            dbg!("TODO: open local file");
+            return;
         } else if !url_to_open.contains(' ')
             && url_to_open.contains('.')
             && !url_to_open.starts_with('.')
