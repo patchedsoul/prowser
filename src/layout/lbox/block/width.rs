@@ -43,60 +43,53 @@ impl LBox {
             false
         };
 
-        let mut underflow;
-        loop {
-            let minimum_width = margin_left.to_px(containing_block.content.width, root_block)
-                + margin_right.to_px(containing_block.content.width, root_block)
-                + if border_box {
-                    0.0
-                } else {
-                    // Content box includes border and padding
-                    border_left + border_right + padding_left + padding_right
-                }
-                + width.to_px(containing_block.content.width, root_block);
+        // https://www.w3.org/TR/CSS2/visudet.html#min-max-widths
+        let mut tentative_used_width = width.to_px(containing_block.content.width, root_block);
 
-            // If width is not auto and the total is wider than the container, treat auto margins as 0.
-            if width != auto && minimum_width > containing_block.content.width {
-                if margin_left == auto {
-                    margin_left = zero.clone();
-                }
-                if margin_right == auto {
-                    margin_right = zero.clone();
+        // Checks `max-width`.
+        if let Some(value) = style.value("max-width") {
+            if let Length(..) = value {
+                let max_width = value.to_px(containing_block.content.width, root_block);
+                if tentative_used_width > max_width {
+                    width = Length(max_width, Unit::Px);
+                    tentative_used_width = max_width;
                 }
             }
-
-            // Adjust used values so that the above sum equals `containing_block.width`.
-            // Each arm of the `match` should increase the total width by exactly `underflow`,
-            // and afterward all values should be absolute lengths in px.
-            underflow = containing_block.content.width - minimum_width;
-
-            // Checks `max-width`. Recalculate total, if `max-width` changes width
-            let mut calculated_width = width.to_px(containing_block.content.width, root_block);
-            if let Some(value) = style.value("max-width") {
-                if let Length(..) = value {
-                    if width == auto {
-                        calculated_width = underflow;
-                    }
-                    let max_width = value.to_px(containing_block.content.width, root_block);
-                    if calculated_width > max_width {
-                        width = Length(max_width, Unit::Px);
-                        continue;
-                    }
-                }
-            }
-            // Checks `min-width`.
-            if let Some(value) = style.value("min-width") {
-                if width == auto {
-                    calculated_width = underflow;
-                }
-                let min_width = value.to_px(containing_block.content.width, root_block);
-                if calculated_width < min_width {
-                    width = Length(min_width, Unit::Px);
-                    continue;
-                }
-            }
-            break;
         }
+
+        // Checks `min-width`.
+        if let Some(value) = style.value("min-width") {
+            let min_width = value.to_px(containing_block.content.width, root_block);
+            if tentative_used_width < min_width {
+                width = Length(min_width, Unit::Px);
+                tentative_used_width = min_width;
+            }
+        }
+
+        let minimum_width = margin_left.to_px(containing_block.content.width, root_block)
+            + margin_right.to_px(containing_block.content.width, root_block)
+            + if border_box {
+                0.0
+            } else {
+                // Content box includes border and padding
+                border_left + border_right + padding_left + padding_right
+            }
+            + tentative_used_width;
+
+        // If width is not auto and the total is wider than the container, treat auto margins as 0.
+        if width != auto && minimum_width > containing_block.content.width {
+            if margin_left == auto {
+                margin_left = zero.clone();
+            }
+            if margin_right == auto {
+                margin_right = zero.clone();
+            }
+        }
+
+        // Adjust used values so that the above sum equals `containing_block.width`.
+        // Each arm of the `match` should increase the total width by exactly `underflow`,
+        // and afterward all values should be absolute lengths in px.
+        let underflow = containing_block.content.width - minimum_width;
 
         match (width == auto, margin_left == auto, margin_right == auto) {
             // If the values are overconstrained, calculate margin_right.
@@ -260,6 +253,26 @@ mod width_test {
         lbox.calculate_block_width(&Dimensions::default(), &Dimensions::default());
 
         assert_eq!(lbox.dimensions.content.width, 105.3);
+    }
+
+    /// checks that min is dominant to max
+    /// and min can be bigger than max
+    #[test]
+    fn max_and_min() {
+        let mut map = HashMap::new();
+        map.insert(String::from("width"), Value::Length(301.5, Unit::Px));
+        map.insert(String::from("min-width"), Value::Length(207.3, Unit::Px));
+        map.insert(String::from("max-width"), Value::Length(105.3, Unit::Px));
+
+        let mut lbox = LBox::new(BoxType::BlockNode(StyledNode {
+            children: Vec::new(),
+            specified_values: map,
+            node: dom::Node::text(String::new()),
+        }));
+
+        lbox.calculate_block_width(&Dimensions::default(), &Dimensions::default());
+
+        assert_eq!(lbox.dimensions.content.width, 207.3);
     }
 
     #[test]

@@ -516,7 +516,7 @@ pub fn display(
     )
     .expect("Couldn't paint");
 
-    canvas.set_viewport(Sdl_rect::new(0, 50, width, height - 50));
+    canvas.set_viewport(Sdl_rect::new(0, 51, width, height - 51));
     if !tabs.is_empty() {
         paint(
             (canvas, texture_creator),
