@@ -260,7 +260,7 @@ view-source:<URL>       View source code of website"
                     cursor = sdl2::mouse::Cursor::from_system(SystemCursor::WaitArrow).unwrap();
                     cursor.set();
                     tabs[current].browse(url.to_string(), dimensions);
-                    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Hand).unwrap();
+                    cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Arrow).unwrap();
                     cursor.set();
 
                     gui::display((&mut canvas, &texture_creator), managers, &tabs, current);
@@ -309,7 +309,7 @@ view-source:<URL>       View source code of website"
                         cursor = sdl2::mouse::Cursor::from_system(SystemCursor::WaitArrow).unwrap();
                         cursor.set();
                         tabs[current].browse(text_input, dimensions);
-                        cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Hand).unwrap();
+                        cursor = sdl2::mouse::Cursor::from_system(SystemCursor::Arrow).unwrap();
                         cursor.set();
 
                         gui::display((&mut canvas, &texture_creator), managers, &tabs, current);
@@ -464,7 +464,7 @@ view-source:<URL>       View source code of website"
                                                 cursor.set();
                                                 tabs[current].browse(url, dimensions);
                                                 cursor = sdl2::mouse::Cursor::from_system(
-                                                    SystemCursor::Hand,
+                                                    SystemCursor::Arrow,
                                                 )
                                                 .unwrap();
                                                 cursor.set();

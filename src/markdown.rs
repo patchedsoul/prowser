@@ -151,7 +151,7 @@ mod parser {
     use super::*;
 
     #[test]
-    fn parse() {
+    fn parse_heading() {
         let mut parser = Parser {
             pos: 0,
             input: String::from(
@@ -159,22 +159,50 @@ mod parser {
 
             ## heading 2
 
-            ### heading 3
-
-            >Quote
-
-            Paragraph
-
-            [some link](https://example.com)",
+            ### heading 3",
             ),
             url: String::new(),
         };
 
         assert_eq!(
             parser.parse(),
-            String::from(
-                "<h1>Headin 1</h1><h2>heading 2</h2><h3>heading 3</h3><q>Quote</q><p>Paragraph</p><a href=\"https://example.com\">some link</a>"
-            )
+            String::from("<h1>Headin 1</h1><h2>heading 2</h2><h3>heading 3</h3>")
         );
+    }
+
+    #[test]
+    fn parse_paragraph() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("Paragraph"),
+            url: String::new(),
+        };
+
+        assert_eq!(parser.parse(), String::from("<p>Paragraph</p>"));
+    }
+
+    #[test]
+    fn parse_link() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("[some link](https://example.com)"),
+            url: String::new(),
+        };
+
+        assert_eq!(
+            parser.parse(),
+            String::from("<a href=\"https://example.com\">some link</a>")
+        );
+    }
+
+    #[test]
+    fn parse_qoute() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from(">Quote"),
+            url: String::new(),
+        };
+
+        assert_eq!(parser.parse(), String::from("<q>Quote</q>"));
     }
 }
