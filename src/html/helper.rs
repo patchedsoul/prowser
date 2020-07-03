@@ -152,7 +152,12 @@ impl Parser {
             }
 
             let (name, value) = self.parse_attr();
-            attributes.entry(name).or_insert(value);
+            /* "Authors can include data for inline client-side scripts or server-side site-wide scripts to process using the data-*="" attributes.
+            These are guaranteed to never be touched by browsers, and allow scripts to include data on HTML elements that scripts can then look for and process."
+            Therefore just throw it away */
+            if !name.starts_with("data-") {
+                attributes.entry(name).or_insert(value);
+            }
         }
         Some(attributes)
     }
@@ -160,7 +165,7 @@ impl Parser {
     /// Parse a sequence of sibling nodes.
     pub fn parse_nodes(&mut self) -> (Vec<dom::Node>, Vec<(String, Option<String>)>) {
         self.consume_whitespace();
-        // <!doctype
+        // <!doctype and <![CDATA
         if self.starts_with("<!") {
             self.consume_while(|c| c != '>');
             self.consume_char(); // >
@@ -170,6 +175,7 @@ impl Parser {
         loop {
             self.consume_whitespace();
             // <!-- comment
+            // do not create Comment nodes
             if self.starts_with("<!--") {
                 while !self.starts_with("-->") {
                     self.consume_char();
@@ -248,6 +254,7 @@ mod parse_element {
         assert!(parser2.parse_element().is_some());
     }
 
+    /// ignore script elements
     #[test]
     fn script() {
         let mut parser = Parser {
@@ -351,6 +358,23 @@ mod parse_element {
         assert_eq!(parser.parse_attributes(), Some(result));
     }
 
+    /// the data-*="" attributes is guaranteed to never be touched by browsers
+    #[test]
+    fn data_attribute() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("data-src='https://example.com' target='_blank'>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let mut result = HashMap::new();
+        result.insert(String::from("target"), String::from("_blank"));
+
+        assert_eq!(parser.parse_attributes(), Some(result));
+    }
+
+    /// first definition is dominant "The parser ignores all such duplicate occurrences of the attribute."
     #[test]
     fn duplicate_attributes() {
         let mut parser = Parser {
@@ -366,6 +390,7 @@ mod parse_element {
         assert_eq!(parser.parse_attributes(), Some(result));
     }
 
+    /// ignore doctype (as it isn't used atm)
     #[test]
     fn nodes_doctype() {
         let mut parser = Parser {
@@ -378,6 +403,46 @@ mod parse_element {
         let result = parser.parse_nodes();
 
         assert_eq!(parser.pos, 15);
+        assert!(result.0.is_empty());
+    }
+
+    /// ignore cdata
+    #[test]
+    fn cdata() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<![CDATA[some stuff]]>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result = parser.parse_nodes();
+
+        assert!(result.0.is_empty());
+        assert_eq!(parser.pos, 22);
+    }
+
+    /* TODO: https://html.spec.whatwg.org/#parse-errors
+
+    - parse-error-abrupt-closing-of-empty-comment
+    - character-reference-outside-unicode-range
+    - control-character-in-input-stream
+
+    */
+
+    /// https://html.spec.whatwg.org/#parse-error-abrupt-doctype-public-identifier abrupt-doctype-system-identifier
+    #[test]
+    fn abrupt_doctype_public_identifier() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<!DOCTYPE html PUBLIC \"foo>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result = parser.parse_nodes();
+
+        assert_eq!(parser.pos, 27);
         assert!(result.0.is_empty());
     }
 
@@ -394,10 +459,20 @@ mod parse_element {
 
         let result = parser.parse_nodes();
 
-        dbg!(&result);
-        dbg!(&parser);
-
         assert!(result.0.is_empty());
         assert_eq!(parser.pos, 16);
+    }
+
+    // FIXME: not really tested atm "Attributes in end tags are completely ignored and do not make their way into the DOM."
+    #[test]
+    fn end_tag_with_attributes() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<div id=foo></div class=bar>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert!(parser.parse_element().is_some());
     }
 }

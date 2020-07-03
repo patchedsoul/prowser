@@ -86,6 +86,7 @@ impl Parser {
         }
     }
 
+    // FIXME: test after replacing entities is correct https://html.spec.whatwg.org/#parse-error-absence-of-digits-in-numeric-character-reference
     /// Parse a text node.
     fn parse_text(&mut self) -> dom::Node {
         let raw_text = self.consume_while(|c| c != '<');
