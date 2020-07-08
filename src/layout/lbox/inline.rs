@@ -217,9 +217,9 @@ impl LBox {
                         let mut end = (max_width / 0.513 / font_size) as usize;
 
                         if !all.is_char_boundary(last + end) {
-                            end += 1;
+                            end -= 1;
                             if !all.is_char_boundary(last + end) {
-                                end += 1;
+                                end -= 1;
                             }
                         }
 

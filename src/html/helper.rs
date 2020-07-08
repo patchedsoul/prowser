@@ -7,6 +7,7 @@ use std::collections::HashMap;
 
 impl Parser {
     /// Parse a single element, including its open tag, contents, and closing tag (if present).
+    /// `<a href="">link</a>`
     pub fn parse_element(&mut self) -> Option<dom::Node> {
         // (Opening) tag.
         self.consume_char(); // <

@@ -90,7 +90,9 @@ view-source:<URL>       View source code of website"
     let mut text_input = String::new();
 
     'running: loop {
-        let (commands, text) = gui::handle_events(&mut event_pump, &sdl_context);
+        let tmp = gui::handle_events(&mut event_pump, &sdl_context, &mut text_input);
+        let commands = tmp.0;
+        text_input = tmp.1;
 
         let viewport = canvas.viewport();
 
@@ -291,13 +293,11 @@ view-source:<URL>       View source code of website"
                 }
                 Command::StartTextInput => {
                     text_util.start();
-                    println!("Text input started");
                     cursor = sdl2::mouse::Cursor::from_system(SystemCursor::IBeam).unwrap();
                     cursor.set();
                 }
                 Command::StopTextInput => {
                     text_util.stop();
-                    println!("Text input stopped");
                     cursor =
                         sdl2::mouse::Cursor::from_system(sdl2::mouse::SystemCursor::Arrow).unwrap();
                     cursor.set();
@@ -486,9 +486,7 @@ view-source:<URL>       View source code of website"
         }
 
         // display text input of search bar
-        if !text.is_empty() {
-            text_input.push_str(&text);
-
+        if !text_input.is_empty() {
             use crate::css::Color;
             use crate::display::DisplayCommand;
             use crate::layout::Rect;

@@ -121,6 +121,10 @@ impl Parser {
                 document.push_str(&format!("<a href=\"{}\">", link_url));
                 document.push_str(&link_text);
                 document.push_str("</a>");
+            } else if self.starts_with("---") {
+                self.consume_while(|c| c != '\n');
+
+                document.push_str("<hr>");
             } else {
                 let paragraph = self.consume_while(|c| c != '\n');
 
@@ -204,5 +208,16 @@ mod parser {
         };
 
         assert_eq!(parser.parse(), String::from("<q>Quote</q>"));
+    }
+
+    #[test]
+    fn parse_hr() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("---"),
+            url: String::new(),
+        };
+
+        assert_eq!(parser.parse(), String::from("<hr>"));
     }
 }

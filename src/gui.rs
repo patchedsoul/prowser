@@ -95,12 +95,12 @@ pub fn init() -> Result<
 pub fn handle_events(
     event_pump: &mut sdl2::EventPump,
     sdl_context: &sdl2::Sdl,
+    text_input: &mut String,
 ) -> (Vec<Command>, String) {
     let mut commands = Vec::new();
     // https://docs.rs/sdl2/0.32.2/src/sdl2/keyboard/mod.rs.html#13
     // http://headerphile.com/sdl2/sdl2-part-11-text-styling/
     let mod_state = &sdl_context.keyboard().mod_state().bits();
-    let mut text_input = String::new();
     let mouse_y = sdl2::mouse::MouseState::new(event_pump).y();
 
     for event in event_pump.poll_iter() {
@@ -150,6 +150,9 @@ pub fn handle_events(
                 Keycode::Up => commands.push(Command::ScrollUp),
                 Keycode::F5 => commands.push(Command::Reload(false)),
                 Keycode::F11 => commands.push(Command::Fullscreen),
+                Keycode::Backspace => {
+                    text_input.pop();
+                }
                 Keycode::T => {
                     let flag_ctrl = mod_state & 0x0040;
                     if flag_ctrl == 64 {
@@ -267,7 +270,7 @@ pub fn handle_events(
         }
     }
 
-    (commands, text_input)
+    (commands, (*text_input).to_string())
 }
 
 /// Clear, paint UI, paint Page
