@@ -425,9 +425,9 @@ mod parse_element {
 
     /* TODO: https://html.spec.whatwg.org/#parse-errors
 
-    - parse-error-abrupt-closing-of-empty-comment
     - character-reference-outside-unicode-range
     - control-character-in-input-stream
+    - invalid-first-character-of-tag-name
 
     */
 
@@ -475,5 +475,210 @@ mod parse_element {
         };
 
         assert!(parser.parse_element().is_some());
+        assert_eq!(parser.pos, 28);
+    }
+
+    #[test]
+    fn end_tag_with_trailing_solidus() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<div></div/>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert!(parser.parse_element().is_some());
+        assert_eq!(parser.pos, 12);
+    }
+
+    /*
+    FIXME: text part not handled atm
+    "This error occurs if the parser encounters the end of the input stream where a tag name is expected. In this case the parser treats the beginning of a start tag (i.e., <) or an end tag (i.e., </) as text content."
+    */
+    #[test]
+    fn eof_before_tag_name() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert!(parser.parse_element().is_none());
+        assert_eq!(parser.pos, 1);
+    }
+
+    #[test]
+    fn eof_in_cdata_doctype() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<![CDATA"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result = parser.parse_nodes();
+
+        assert!(result.0.is_empty());
+        assert_eq!(parser.pos, 8);
+    }
+
+    #[test]
+    fn eof_in_tag() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<div id="),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert!(parser.parse_element().is_none());
+        assert_eq!(parser.pos, 8);
+    }
+
+    #[test]
+    fn incorrectly_closed_comment() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<!-- comment --!>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result = parser.parse_nodes();
+
+        assert!(result.0.is_empty());
+        assert_eq!(parser.pos, 17);
+    }
+
+    #[test]
+    fn abrupt_closing_of_empty_comment() {
+        let mut parser1 = Parser {
+            pos: 0,
+            input: String::from("<!-->"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result1 = parser1.parse_nodes();
+
+        assert!(result1.0.is_empty());
+        assert_eq!(parser1.pos, 5);
+
+        let mut parser2 = Parser {
+            pos: 0,
+            input: String::from("<!--->"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result2 = parser2.parse_nodes();
+
+        assert!(result2.0.is_empty());
+        assert_eq!(parser2.pos, 6);
+    }
+
+    #[test]
+    fn incorrectly_opened_comment() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("<! treated as comment >"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let result = parser.parse_nodes();
+
+        assert!(result.0.is_empty());
+        assert_eq!(parser.pos, 23);
+    }
+
+    #[test]
+    fn missing_attribute_value() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("id=>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(parser.parse_attr(), (String::from("id"), String::new()));
+    }
+
+    #[test]
+    fn unexpected_character_in_attribute_name() {
+        let mut parser1 = Parser {
+            pos: 0,
+            input: String::from("foo<div"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(
+            parser1.parse_attr(),
+            (String::from("foo<div"), String::new())
+        );
+
+        let mut parser2 = Parser {
+            pos: 0,
+            input: String::from("id'bar'"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(
+            parser2.parse_attr(),
+            (String::from("id'bar'"), String::new())
+        );
+    }
+
+    #[test]
+    fn unexpected_character_in_unquoted_attribute_value() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("foo=b'ar'"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(
+            parser.parse_attr(),
+            (String::from("foo"), String::from("b'ar'"))
+        );
+    }
+
+    // FIXME: Due to a forgotten attribute name the parser treats this markup as a div element with
+    // two attributes: a "foo" attribute with a "bar" value and a "="baz"" attribute with an empty value.
+    #[ignore]
+    #[test]
+    fn unexpected_equals_sign_before_attribute_name() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("foo=\"bar\" =\"baz\""),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let mut result = HashMap::new();
+        result.insert(String::from("foo"), String::from("bar"));
+        result.insert(String::from("=\"baz\""), String::new());
+
+        assert_eq!(parser.parse_attributes().unwrap(), result);
+    }
+
+    /// attribute names can have : in their name, `xmlns:xlink`
+    #[test]
+    fn xml_attribute() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("xml:lang='en-US'"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(
+            parser.parse_attr(),
+            (String::from("xml:lang"), String::from("en-US"))
+        );
     }
 }

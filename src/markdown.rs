@@ -121,6 +121,28 @@ impl Parser {
                 document.push_str(&format!("<a href=\"{}\">", link_url));
                 document.push_str(&link_text);
                 document.push_str("</a>");
+            } else if self.starts_with("```") {
+                self.consume_char(); // `
+                self.consume_char(); // `
+                self.consume_char(); // `
+
+                // FIXME: parse till ``` and not just a singular `
+                let code = self.consume_while(|c| c != '`');
+                self.consume_char(); // `
+                self.consume_char(); // `
+                self.consume_char(); // `
+
+                document.push_str("<code>");
+                document.push_str(&code);
+                document.push_str("</code>");
+            } else if self.starts_with("`") {
+                self.consume_char(); // `
+                let code = self.consume_while(|c| c != '`');
+                self.consume_char(); // `
+
+                document.push_str("<code>");
+                document.push_str(&code);
+                document.push_str("</code>");
             } else if self.starts_with("---") {
                 self.consume_while(|c| c != '\n');
 
@@ -219,5 +241,27 @@ mod parser {
         };
 
         assert_eq!(parser.parse(), String::from("<hr>"));
+    }
+
+    #[test]
+    fn parse_inline_code() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("`let x;`"),
+            url: String::new(),
+        };
+
+        assert_eq!(parser.parse(), String::from("<code>let x;</code>"));
+    }
+
+    #[test]
+    fn parse_multiline_code() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("```let x;\ndbg!();```"),
+            url: String::new(),
+        };
+
+        assert_eq!(parser.parse(), String::from("<code>let x;\ndbg!();</code>"));
     }
 }

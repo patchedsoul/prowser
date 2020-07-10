@@ -60,7 +60,9 @@ impl Parser {
     /// Parse a tag or attribute name.
     fn parse_tag_name(&mut self) -> String {
         self.consume_while(|c| match c {
-            'a'..='z' | 'A'..='Z' | '0'..='9' | '-' => true,
+            // https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-character-in-attribute-name
+            // `xml:lang` attribute
+            'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '<' | '"' | '\'' | ':' => true,
             _ => false,
         })
         .to_ascii_lowercase()
@@ -69,9 +71,11 @@ impl Parser {
     /// The attribute value can remain unquoted if it doesn't contain ASCII whitespace or any of `"` `'` `` ` `` `=` `<` or `>`.
     /// Otherwise, it has to be quoted using either single or double quotes.
     /// <https://html.spec.whatwg.org/#a-quick-introduction-to-html>
+    /// But if the parser encounters a U+0022 ("), U+0027 ('), U+003C (<), U+003D (=), or U+0060 (`) code point in an unquoted attribute value.
+    /// The parser includes such code points in the attribute value.
     fn parse_attribute_value(&mut self) -> String {
         self.consume_while(|c| match c {
-            ' ' | '"' | '\'' | '`' | '=' | '<' | '>' => false,
+            ' ' | '>' => false,
             _ => true,
         })
         .to_ascii_lowercase()
@@ -123,6 +127,8 @@ impl Parser {
         text = text.replace("&reg;", "®");
         text = text.replace("&trade;", "™");
         text = text.replace("&#9650;", "▲");
+        text = text.replace("&nbsp;", " ");
+        text = text.replace("&ndash;", "-");
 
         dom::Node::text(text)
     }
