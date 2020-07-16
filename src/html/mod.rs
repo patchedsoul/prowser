@@ -62,7 +62,7 @@ impl Parser {
         self.consume_while(|c| match c {
             // https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-character-in-attribute-name
             // `xml:lang` attribute
-            'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '<' | '"' | '\'' | ':' => true,
+            'a'..='z' | 'A'..='Z' | '0'..='9' | '-' | '<' | '"' | '\'' | ':' | '_' => true,
             _ => false,
         })
         .to_ascii_lowercase()
@@ -86,7 +86,7 @@ impl Parser {
         match self.next_char() {
             Some('<') => self.parse_element(),
             Some(_) => Some(self.parse_text()),
-            _ => None,
+            None => None,
         }
     }
 
@@ -151,5 +151,22 @@ pub fn parse(source: String, url: String) -> (dom::Node, Vec<(String, Option<Str
             dom::Node::elem("html".to_string(), HashMap::new(), nodes),
             style,
         )
+    }
+}
+
+#[cfg(test)]
+mod parse_element {
+    use super::*;
+
+    #[test]
+    fn tag_name() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("crates-list"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        assert_eq!(parser.parse_tag_name(), String::from("crates-list"));
     }
 }

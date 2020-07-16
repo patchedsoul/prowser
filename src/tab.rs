@@ -121,13 +121,13 @@ impl Tab {
             self.style_root = Some(style_root);
             return;
         } else if url_to_open.starts_with("gopher://") {
-            dbg!("TODO: gopher");
+            dbg!("maybe TODO: gopher");
             return;
         } else if url_to_open.starts_with("gemini://") {
-            dbg!("TODO: gemini");
+            dbg!("maybe TODO: gemini");
             return;
         } else if url_to_open.starts_with("finger://") {
-            dbg!("TODO: finger");
+            dbg!("maybe TODO: finger");
             return;
         } else if url_to_open.starts_with("file://") {
             dbg!("TODO: open local file");

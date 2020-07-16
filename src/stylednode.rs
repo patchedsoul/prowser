@@ -17,6 +17,7 @@ pub enum Display {
     Inline,
     InlineBlock,
     None,
+    TableRow,
 }
 
 impl StyledNode {
@@ -63,6 +64,7 @@ impl StyledNode {
         match self.value("display") {
             Some(Value::Keyword(s)) => match &*s {
                 "block" | "list-item" | "table" | "grid" | "flex" => Display::Block,
+                "table-row" => Display::TableRow,
                 "none" => Display::None,
                 "inline-block" => Display::InlineBlock,
                 _ => Display::Inline,

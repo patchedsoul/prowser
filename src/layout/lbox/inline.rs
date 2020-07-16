@@ -4,7 +4,7 @@ use crate::css::Unit;
 use crate::css::Value::{Keyword, Length};
 use crate::dom;
 use crate::layout::lbox::LBox;
-use crate::layout::{Dimensions, InlineNode};
+use crate::layout::{Dimensions, InlineNode, TableRowNode};
 
 impl LBox {
     /// Lay out a inline-level element and its descendants.
@@ -183,7 +183,7 @@ impl LBox {
 
         let d = &mut self.dimensions;
 
-        if let InlineNode(ref mut node, _) = self.box_type {
+        if let InlineNode(ref mut node, _) | TableRowNode(ref mut node) = self.box_type {
             if let dom::NodeType::Text(ref mut text) = &mut node.node.node_type {
                 let size = style.lookup("font-size", &Length(16.0, Unit::Px));
                 // relativ to parent font size

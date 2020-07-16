@@ -2,7 +2,9 @@ mod block;
 mod inline;
 
 use crate::dom;
-use crate::layout::{AnonymousBlock, BlockNode, BoxType, Dimensions, InlineNode, StyledNode};
+use crate::layout::{
+    AnonymousBlock, BlockNode, BoxType, Dimensions, InlineNode, StyledNode, TableRowNode,
+};
 
 use std::default::Default;
 
@@ -87,7 +89,7 @@ impl LBox {
     /// returns node with `specified_values` (aka css style) and children
     fn get_style_node(&self) -> &StyledNode {
         match self.box_type {
-            BlockNode(ref node) | InlineNode(ref node, _) => node,
+            TableRowNode(ref node) | BlockNode(ref node) | InlineNode(ref node, _) => node,
             AnonymousBlock => unreachable!("Anonymous block box has no style node"),
         }
     }
@@ -105,7 +107,20 @@ impl LBox {
             InlineNode(_, inline_block) => {
                 self.layout_inline(containing_block, root_block, parent_height, inline_block)
             }
+            TableRowNode(..) => self.layout_tablerow(containing_block, root_block, parent_height),
         }
+    }
+
+    fn layout_tablerow(
+        &mut self,
+        containing_block: &mut Dimensions,
+        root_block: &Dimensions,
+        parent_height: Option<f32>,
+    ) {
+        self.layout_inline(containing_block, root_block, parent_height, false);
+
+        containing_block.used_height += self.dimensions.content.height;
+        containing_block.used_width = 0.0;
     }
 
     /// Lay out a anonymous element and its descendants.
@@ -119,7 +134,7 @@ impl LBox {
         // Position the box below all the previous boxes in the container.
         d.content.y = containing_block.content.height + containing_block.content.y;
 
-        // FIXME: if there are only inlince chidlren, the height shouldn't be added. is this a problem here?
+        // FIXME: if there are only inlince children, the height shouldn't be added. is this a problem here?
 
         // Recursively lay out the children of this box.
         self.layout_anonymous_children(root_block);
@@ -141,7 +156,7 @@ impl LBox {
     pub fn get_inline_container(&mut self) -> &mut Self {
         match self.box_type {
             AnonymousBlock => self,
-            InlineNode(..) | BlockNode(..) => {
+            TableRowNode(..) | InlineNode(..) | BlockNode(..) => {
                 // If we've just generated an anonymous block box, keep using it.
                 // Otherwise, create a new one.
                 match self.children.last() {

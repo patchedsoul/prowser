@@ -149,7 +149,7 @@ impl Parser {
                     continue;
                 }
                 None => return None,
-                _ => {}
+                Some(_) => {}
             }
 
             let (name, value) = self.parse_attr();
@@ -680,5 +680,24 @@ mod parse_element {
             parser.parse_attr(),
             (String::from("xml:lang"), String::from("en-US"))
         );
+    }
+
+    #[test]
+    fn attribute_dash() {
+        let mut parser = Parser {
+            pos: 0,
+            input: String::from("v-bind:crates_map='crates' v-bind:tag_filter='tag_filter'>"),
+            url: String::new(),
+            style: Vec::new(),
+        };
+
+        let mut result = HashMap::new();
+        result.insert(String::from("v-bind:crates_map"), String::from("crates"));
+        result.insert(
+            String::from("v-bind:tag_filter"),
+            String::from("tag_filter"),
+        );
+
+        assert_eq!(parser.parse_attributes(), Some(result));
     }
 }

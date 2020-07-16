@@ -3,7 +3,7 @@
 
 pub mod lbox;
 
-pub use self::BoxType::{AnonymousBlock, BlockNode, InlineNode};
+pub use self::BoxType::{AnonymousBlock, BlockNode, InlineNode, TableRowNode};
 use crate::stylednode::{Display, StyledNode};
 
 use sdl2::rect::Rect as Sdl_rect;
@@ -43,6 +43,7 @@ pub struct EdgeSizes {
 pub enum BoxType {
     AnonymousBlock,
     BlockNode(StyledNode),
+    TableRowNode(StyledNode),
     /// bool => isInlineBlock
     InlineNode(StyledNode, bool),
 }
@@ -67,6 +68,7 @@ fn build_layout_tree(style_node: StyledNode) -> lbox::LBox {
     // Create the root box.
     let mut root = lbox::LBox::new(match style_node.display() {
         Display::Block => BlockNode(style_node.clone()),
+        Display::TableRow => TableRowNode(style_node.clone()),
         Display::Inline => InlineNode(style_node.clone(), false),
         Display::InlineBlock => InlineNode(style_node.clone(), true),
         Display::None => unreachable!("Root node has `display: none`."),
@@ -84,7 +86,7 @@ fn build_layout_tree(style_node: StyledNode) -> lbox::LBox {
     // Create the descendant boxes.
     for child in style_node.children {
         match child.display() {
-            Display::Block => root.children.push(build_layout_tree(child)),
+            Display::Block | Display::TableRow => root.children.push(build_layout_tree(child)),
             Display::Inline | Display::InlineBlock => {
                 // if one or several block boxes, create anonymous block
                 if block_type {

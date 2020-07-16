@@ -1,7 +1,7 @@
 use crate::css::{Color, Unit, Value};
 use crate::data_storage;
 use crate::dom;
-use crate::layout::{self, lbox, AnonymousBlock, BlockNode, InlineNode, Rect};
+use crate::layout::{self, lbox, AnonymousBlock, BlockNode, InlineNode, Rect, TableRowNode};
 use crate::stylednode::StyledNode;
 
 #[derive(Debug)]
@@ -316,7 +316,9 @@ fn render_image(list: &mut DisplayList, layout_box: &lbox::LBox, url: &str) {
 /// Return the specified Value for CSS property `name`, or None if no Value was specified.
 fn get_value(layout_box: &lbox::LBox, name: &str) -> Option<Value> {
     match layout_box.box_type {
-        BlockNode(ref style) | InlineNode(ref style, _) => style.value(name),
+        TableRowNode(ref style) | BlockNode(ref style) | InlineNode(ref style, _) => {
+            style.value(name)
+        }
         AnonymousBlock => None,
     }
 }
